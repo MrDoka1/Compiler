@@ -1,14 +1,24 @@
-package ru.krizhanovskiy.token;
+package ru.krizhanovskiy.lexer.token;
 
-import java.util.Map;
 
 public enum TokenType {
+    /**
+     *  При добавлении нового токена:
+     *  - перейди в нужну категорию и сделай там:
+     *      - добавь строку в нужный switch
+     *      - проверь переменную максимальной длины, может её нужно обновить
+     *      - проверь переменную продолжения проверки, может её нужно обновить
+     *          (например, если есть подобные случаи "=" и "==" - true, если нет - false)
+     */
+
     // --- Keywords ---
     IDENTIFIER,
     NUMBER,
+    FLOAT_NUMBER,
 
     INT,
     FLOAT,
+    BOOLEAN,
     VOID,
     IF,
     ELSE,
@@ -43,12 +53,13 @@ public enum TokenType {
     COMMA,
     ;
 
-    public final int MAX_LENGTH_KEYWORD = 1;
-
+    public static final int MAX_LENGTH_KEYWORD = 8;
+    public static final boolean CHECK_FURTHER_KEYWORD = false;
     public static TokenType getKeyword(String keyword) {
         switch (keyword) {
             case "int": return TokenType.INT;
             case "float": return TokenType.FLOAT;
+            case "boolean": return TokenType.BOOLEAN;
             case "void": return TokenType.VOID;
             case "if": return TokenType.IF;
             case "else": return TokenType.ELSE;
@@ -62,8 +73,8 @@ public enum TokenType {
         }
     }
 
-    public final int MAX_LENGTH_OPERATION = 2;
-
+    public static final int MAX_LENGTH_OPERATION = 2;
+    public static final boolean CHECK_FURTHER_OPERATION = true;
     public static TokenType getOperation(String operation) {
         switch (operation) {
             case "+": return TokenType.PLUS;
@@ -84,8 +95,8 @@ public enum TokenType {
         }
     }
 
-    public final int MAX_LENGTH_PUNCTUATION = 1;
-
+    public static final int MAX_LENGTH_PUNCTUATION = 1;
+    public static final boolean CHECK_FURTHER_PUNCTUATION = false;
     public static TokenType getPunctuation(String punctuation) {
         switch (punctuation) {
             case "(": return TokenType.OPEN_BRACKET;
