@@ -13,8 +13,12 @@ public enum TokenType {
 
     // --- Keywords ---
     IDENTIFIER,
+    STRING,
     NUMBER,
     FLOAT_NUMBER,
+
+    TRUE,
+    FALSE,
 
     INT,
     FLOAT,
@@ -23,6 +27,7 @@ public enum TokenType {
     IF,
     ELSE,
     WHILE,
+    DO,
     FOR,
     BREAK,
     CONTINUE,
@@ -56,56 +61,58 @@ public enum TokenType {
     public static final int MAX_LENGTH_KEYWORD = 8;
     public static final boolean CHECK_FURTHER_KEYWORD = false;
     public static TokenType getKeyword(String keyword) {
-        switch (keyword) {
-            case "int": return TokenType.INT;
-            case "float": return TokenType.FLOAT;
-            case "boolean": return TokenType.BOOLEAN;
-            case "void": return TokenType.VOID;
-            case "if": return TokenType.IF;
-            case "else": return TokenType.ELSE;
-            case "while": return TokenType.WHILE;
-            case "for": return TokenType.FOR;
-            case "break": return TokenType.BREAK;
-            case "continue": return TokenType.CONTINUE;
-            case "return": return TokenType.RETURN;
-            default: return null;
-
-        }
+        return switch (keyword) {
+            case "true" -> TokenType.TRUE;
+            case "false" -> TokenType.FALSE;
+            case "int" -> TokenType.INT;
+            case "float" -> TokenType.FLOAT;
+            case "boolean" -> TokenType.BOOLEAN;
+            case "void" -> TokenType.VOID;
+            case "if" -> TokenType.IF;
+            case "else" -> TokenType.ELSE;
+            case "while" -> TokenType.WHILE;
+            case "do" -> TokenType.DO;
+            case "for" -> TokenType.FOR;
+            case "break" -> TokenType.BREAK;
+            case "continue" -> TokenType.CONTINUE;
+            case "return" -> TokenType.RETURN;
+            default -> null;
+        };
     }
 
     public static final int MAX_LENGTH_OPERATION = 2;
     public static final boolean CHECK_FURTHER_OPERATION = true;
     public static TokenType getOperation(String operation) {
-        switch (operation) {
-            case "+": return TokenType.PLUS;
-            case "-": return TokenType.MINUS;
-            case "*": return TokenType.MULTIPLICATION;
-            case "/": return TokenType.DIVISION;
-            case "=": return TokenType.EQUALS;
-            case "==" : return TokenType.DOUBLE_EQUAL;
-            case "!=": return TokenType.NOT_EQUALS;
-            case "<": return TokenType.LESS_THAN;
-            case ">": return TokenType.GREATER_THAN;
-            case "<=": return TokenType.LESS_THAN_EQUALS;
-            case ">=": return TokenType.GREATER_THAN_EQUALS;
-            case "&": return TokenType.AND;
-            case "|": return TokenType.OR;
-            case "!" : return TokenType.NOT;
-            default: return null;
-        }
+        return switch (operation) {
+            case "+" -> TokenType.PLUS;
+            case "-" -> TokenType.MINUS;
+            case "*" -> TokenType.MULTIPLICATION;
+            case "/" -> TokenType.DIVISION;
+            case "=" -> TokenType.EQUALS;
+            case "==" -> TokenType.DOUBLE_EQUAL;
+            case "!=" -> TokenType.NOT_EQUALS;
+            case "<" -> TokenType.LESS_THAN;
+            case ">" -> TokenType.GREATER_THAN;
+            case "<=" -> TokenType.LESS_THAN_EQUALS;
+            case ">=" -> TokenType.GREATER_THAN_EQUALS;
+            case "&&" -> TokenType.AND;
+            case "||" -> TokenType.OR;
+            case "!" -> TokenType.NOT;
+            default -> null;
+        };
     }
 
     public static final int MAX_LENGTH_PUNCTUATION = 1;
     public static final boolean CHECK_FURTHER_PUNCTUATION = false;
     public static TokenType getPunctuation(String punctuation) {
-        switch (punctuation) {
-            case "(": return TokenType.OPEN_BRACKET;
-            case ")": return TokenType.CLOSE_BRACKET;
-            case "{": return TokenType.OPEN_CURLY_BRACKET;
-            case "}": return TokenType.CLOSE_CURLY_BRACKET;
-            case ";": return TokenType.SEMICOLON;
-            case ",": return TokenType.COMMA;
-            default: return null;
-        }
+        return switch (punctuation) {
+            case "(" -> TokenType.OPEN_BRACKET;
+            case ")" -> TokenType.CLOSE_BRACKET;
+            case "{" -> TokenType.OPEN_CURLY_BRACKET;
+            case "}" -> TokenType.CLOSE_CURLY_BRACKET;
+            case ";" -> TokenType.SEMICOLON;
+            case "," -> TokenType.COMMA;
+            default -> null;
+        };
     }
 }

@@ -1,5 +1,30 @@
-int a = 123;
+int main() {
+    int a = 3 * (1 + 2);
 
-if (a > 2) {
-    int b = 1;
+    if (a == b) {
+    }
+
+    int a = 123; // однострочный комментарий ;)
+
+    /*  многострочный
+
+         комментарий   */
+
+    if (a > 2) {
+        int b = 1.0;
+    }
+
+    while(true) {
+        break;
+    }
+
+    do {
+        continue;
+    } while(false);
+
+    print("Привет \"Мир\".");
+}
+/*
+void function(int i) {
+    return i;
 }

@@ -1,0 +1,98 @@
+<program> ::= <method> <method-optional>
+
+<method-optional> ::= ε | <method> <method-optional>
+
+<method> ::= <return-type> <identifier> "(" <parameters> ")" "{" <statements> "}"
+
+<parameters> ::= ε | <parameter> <parameter-optional>
+<parameter-optional> ::= ε | "," <parameter> <parameter-optional>
+<parameter> ::= <type> <identifier>
+
+<return-type> ::= <type> | "void"
+
+<statements> ::= ε | <statement> <statements-optional>
+<statements-optional> ::= ε | <statement> <statements-optional>
+
+<statement> ::= <declaration> <optional-assignment> ";"
+              | <assignment-or-function-call> ";"
+              | "break" ";"
+              | "continue" ";"
+              | <if-statement>
+              | <while-loop>
+              | <for-loop>
+              | <return-statement>
+              | "{" <statements> "}"
+
+<assignment-or-function-call> ::= <identifier> <continue-assignment-or-function-call>
+<continue-assignment-or-function-call> ::= "=" <expression> | "(" <arguments> ")"
+
+<declaration> ::= <type> <identifier>
+<declaration-and-assigment> ::= <declaration> "=" <expression>
+
+<optional-assignment> ::= ε | "=" <expression>
+
+<return-statement> ::= "return" <return-expression-or-void> ";"
+
+<return-expression-or-void> ::= ε | <expression>
+
+<type> ::= "boolean" | "int" | "float"
+
+<if-statement> ::= "if" "(" <expression> ")" <statement> <else-optional>
+
+<else-optional> ::= ε | "else" <statement>
+
+<while-loop> ::= "while" "(" <expression> ")" <statement> | "do" <statement> "while" "(" <expression> ")" ";"
+
+<for-loop> ::= "for" "(" <declaration-and-assigment> ";" <expression> ";" <assignment> ")" <statement>
+
+<assignment> ::= <identifier> "=" <expression>
+
+<expression> ::= <logical-or-expression>
+
+<logical-or-expression> ::= <logical-and-expression> <logical-or-tail>
+<logical-or-tail> ::= ε | "||" <logical-and-expression> <logical-or-tail>
+
+<logical-and-expression> ::= <equality-expression> <logical-and-tail>
+<logical-and-tail> ::= ε | "&&" <equality-expression> <logical-and-tail>
+
+<equality-expression> ::= <relational-expression> <equality-tail>
+<equality-tail> ::= ε
+                        | "==" <relational-expression> <equality-tail>
+                        | "!=" <relational-expression> <equality-tail>
+
+<relational-expression> ::= <additive-expression> <relational-tail>
+<relational-tail> ::= ε
+                        | "<" <additive-expression> <relational-tail>
+                        | ">" <additive-expression> <relational-tail>
+                        | "<=" <additive-expression> <relational-tail>
+                        | ">=" <additive-expression> <relational-tail>
+
+<additive-expression> ::= <multiplicative-expression> <additive-tail>
+<additive-tail> ::= ε
+                        | "+" <multiplicative-expression> <additive-tail>
+                        | "-" <multiplicative-expression> <additive-tail>
+
+<multiplicative-expression> ::= <unary-expression> <multiplicative-tail>
+<multiplicative-tail> ::= ε
+                        | "*" <unary-expression> <multiplicative-tail>
+                        | "/" <unary-expression> <multiplicative-tail>
+
+<unary-expression> ::= <primary-expression>
+                     | "!" <unary-expression>
+                     | "-" <unary-expression>
+
+<primary-expression> ::= <identifier-or-function-call>
+                       | <number>
+                       | <boolean-literal>
+                       | "(" <expression> ")"
+
+<identifier-or-function-call> ::= <identifier> <identifier-end-or-function-call>
+<identifier-end-or-function-call> ::= ε | "(" <arguments> ")"
+
+<arguments> ::= ε | <argument-list> | <string-literal>
+<argument-list> ::= <expression> <argument-list-optional>
+<argument-list-optional> ::= ε | "," <argument-list>
+
+<boolean-literal> ::= "true" | "false"
+
+<number> ::= <int-literal> | <float-literal>
