@@ -18,6 +18,16 @@ public class Parser {
 
     public boolean error = false;
 
+    private static final Map<String, String> rotationElements = Map.of(
+        "logical-and-expression", "logical-or-tail",
+        "equality-expression","logical-and-tail",
+        "relational-expression","equality-tail",
+        "additive-expression", "relational-tail",
+        "multiplicative-expression", "additive-tail",
+        "unary-expression", "multiplicative-tail"
+);
+    private static final Set<String> endSymbols = Set.of("(", ")", ",", ";");
+
     public Parser(List<Token> tokens) {
         this.tokens = tokens;
         this.grammar = GrammarParser.getGrammar();
@@ -49,6 +59,7 @@ public class Parser {
 
             String terminalOrNonTerminal = stack.pop();
 
+            if (currentIndexToken >= tokens.size()) break;
             Token currentToken = tokens.get(currentIndexToken);
 
             if (nonTerminals.contains(terminalOrNonTerminal)) {
@@ -62,22 +73,65 @@ public class Parser {
                 }
 
                 if (matchProduction.isEmpty()) {
-                    if (firstElements.get(terminalOrNonTerminal).contains("ε")) {
+                    if (firstElements.get(terminalOrNonTerminal).contains("E")) {
                         addNonTerminalToAST(terminalOrNonTerminal, 1);
                         addTerminalToAST(null);
                         // OK
                     } else {
                         // ERROR
-                        System.err.println("Syntax Error in token: " + currentToken);
-                        stack.push(terminalOrNonTerminal);
+                        error = true;
+                        if (tokens.get(currentIndexToken).type() == TokenType.STRING) {
+                            System.err.println("Syntax error: the string must be the only argument to the function. Line: " +
+                                    currentToken.line() + ", column: " + currentToken.column());
+                        }
+                        else {
+                            System.err.println("Syntax Error in token: " + currentToken);
+                            stack.push(terminalOrNonTerminal);
+                        }
                         currentIndexToken++;
                     }
                 } else {
                     Stack<String> newStack = new Stack<>();
                     newStack.addAll(stack);
-                    selectProductions.push(new SelectProduction(terminalOrNonTerminal, 0,
+
+                    int indexProduction = 0;
+                    /*if (matchProduction.size() > 1) {
+                        if (currentIndexToken+1 == tokens.size()) {
+                            System.err.println("Syntax Error in token: " + currentToken);
+                        } else {
+
+                            indexProduction = -1;
+                            int maxIndexToken = 0;
+                            int indexProductionSize1 = -1;
+                            for (int i = 0; i < matchProduction.size(); i++) {
+                                if (production.get(matchProduction.get(i)).size() == 1) {
+                                    indexProductionSize1 = i;
+                                    continue;
+                                }
+                                String operation = production.get(matchProduction.get(i)).get(1);
+                                int curIndex = currentIndexToken + 1;
+                                while (curIndex != tokens.size()) {
+                                    Token nextToken = tokens.get(curIndex);
+                                    if (endSymbols.contains(nextToken.name())) break;
+                                    if (nextToken.name().equals(operation)) {
+                                        if (maxIndexToken < curIndex) {
+                                            maxIndexToken = curIndex;
+                                            indexProduction = i;
+                                        }
+                                    }
+                                    curIndex++;
+                                }
+                            }
+                            if (indexProduction == -1) indexProduction = indexProductionSize1;
+                            if (indexProduction == -1) {
+                                System.err.println("Syntax Error in token: " + currentToken);
+                            }
+                        }
+                    }*/
+
+                    selectProductions.push(new SelectProduction(terminalOrNonTerminal, indexProduction,
                             matchProduction, currentIndexToken, newStack));
-                    productionList = new ArrayList<>(production.get(matchProduction.get(0)));
+                    productionList = new ArrayList<>(production.get(matchProduction.get(indexProduction)));
                     Collections.reverse(productionList);
                     stack.addAll(productionList);
 
@@ -89,10 +143,10 @@ public class Parser {
             } else {
                 if (terminalOrNonTerminal.equals("$")) {
                     if (currentToken.type() == null && currentToken.name().equals("$")) {
-                        System.out.println("Ok");
+//                        System.out.println("Ok");
                         // Всё окей, дошли до конца
                     }
-                } else if (terminalOrNonTerminal.equals("ε")) {
+                } else if (terminalOrNonTerminal.equals("E")) {
                     addTerminalToAST(null);
                     continue;
                 } else if (equalToken(currentToken, terminalOrNonTerminal)) {
@@ -101,7 +155,6 @@ public class Parser {
                     // -----------
                     currentIndexToken++;
                 } else {
-                    System.out.println(currentToken + " " + terminalOrNonTerminal);
                     while (!selectProductions.isEmpty()) {
                         SelectProduction selectProduction = selectProductions.pop();
                         int currentNumberProduction = selectProduction.currentNumberProduction + 1;
@@ -123,15 +176,25 @@ public class Parser {
 
                     // TODO: Откат или ошибка.
                     if (checkMissingSemicolon(terminalOrNonTerminal, currentToken)) {
+                        error = true;
                         System.err.println("Syntax error: missing semicolon in line " + tokens.get(currentIndexToken - 1).line());
-                    } else {
+                    } else if (currentIndexToken != 0 && tokens.get(currentIndexToken-1).type() == TokenType.STRING) {
+                        error = true;
+                        System.err.println("Syntax error: the string must be the only argument to the function. Line: " +
+                                currentToken.line() + ", column: " + currentToken.column());
+                        while (currentIndexToken != tokens.size() && tokens.get(currentIndexToken).type() != TokenType.CLOSE_BRACKET)
+                            currentIndexToken++;
+                        currentIndexToken++;
+                    }
+                    else {
+                        error = true;
                         System.err.println("Syntax Error in token: " + currentToken + ", expected: " + terminalOrNonTerminal);
                     }
                 }
             }
 //            System.out.println(currentIndexToken);
         }
-        System.out.println(tokens.get(currentIndexToken));
+        //System.out.println(tokens.get(currentIndexToken));
     }
 
     private boolean productionHaveFirstToken(Token token, String terminalOrNonTerminal) {
@@ -204,8 +267,36 @@ public class Parser {
     private void addTerminalToAST(Token currentToken) {
         currentNode.getChildren().add(new TokenNode(currentToken));
         while (currentNode != null && currentNode.getChildren().size() == currentNode.getQtyProductions()) {
+            currentNode = checkAndRotation(currentNode);
             currentNode = currentNode.getPrev();
         }
+    }
+    private NonTerminalNode checkAndRotation(NonTerminalNode currentNode) {
+        if (rotationElements.containsKey(currentNode.name)) {
+            NonTerminalNode parent = currentNode.getPrev();
+            if (parent.name.equals(rotationElements.get(currentNode.name))) {
+                NonTerminalNode parent2 = parent.getPrev();
+                List<Node> parent2Children = parent2.getChildren();
+                List<Node> parentChildren = parent.getChildren();
+
+                int index = parent2.name.equals(rotationElements.get(currentNode.name)) ? 1 : 0;
+                if (parent2.name.equals(rotationElements.get(currentNode.name))) {
+                    TokenNode tempOp = (TokenNode) parentChildren.get(0);
+                    parentChildren.set(0, parent2Children.get(0));
+                    parent2Children.set(0, tempOp);
+                }
+
+                currentNode.setPrev(parent2);
+                NonTerminalNode secondNode = (NonTerminalNode) parent2Children.get(index);
+                secondNode.setPrev(parent);
+
+                parentChildren.set(1, secondNode);
+                parent2Children.set(index, currentNode);
+                checkAndRotation(currentNode);
+                return secondNode;
+            }
+        }
+        return currentNode;
     }
     /* ------------------- AST Actions END -------------------- */
 }

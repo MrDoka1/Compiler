@@ -1,8 +1,7 @@
 package ru.krizhanovskiy.ast;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import ru.krizhanovskiy.lexer.token.TokenType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +13,9 @@ public class NonTerminalNode extends Node {
     @JsonIgnore
     NonTerminalNode prev;
     int qtyProductions;
+
+    String value;
+    TokenType type;
 
 
     public NonTerminalNode(String name) {
@@ -37,5 +39,21 @@ public class NonTerminalNode extends Node {
     }
     public NonTerminalNode getPrev() {
         return prev;
+    }
+    public void setPrev(NonTerminalNode prev) {
+        this.prev = prev;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public TokenType getType() {
+        return type;
+    }
+
+    public void setValueAndType(String value, TokenType type) {
+        this.value = value;
+        this.type = type;
     }
 }

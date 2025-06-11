@@ -3,10 +3,11 @@ package ru.krizhanovskiy.parser;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.*;
 
 public class GrammarParser {
-    private static final String filename = "src/main/java/ru/krizhanovskiy/parser/grammar.csv";
+    private static final String filename = "/parser/grammar.csv";
     private static final Map<String, List<List<String>>> grammar = new HashMap<>();
     private static final Set<String> nonTerminals = new HashSet<>();
 
@@ -24,7 +25,8 @@ public class GrammarParser {
     public static Map<String, List<List<String>>> getGrammar() {
         if (!grammar.isEmpty()) return grammar;
 
-        try (BufferedReader reader = new BufferedReader(new FileReader(filename))
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(Objects.requireNonNull(GrammarParser.class.getResourceAsStream(filename))))
         ) {
 
             while ((line = reader.readLine()) != null) {
@@ -91,9 +93,9 @@ public class GrammarParser {
                 rule.add(getNonTerminal());
             } else if (line.charAt(pos) == '"') {
                 rule.add(getTerminal());
-            } else if (line.charAt(pos) == 'ε') {
+            } else if (line.charAt(pos) == 'E') {
                 pos++;
-                return List.of("ε");
+                return List.of("E");
             }
         }
         return rule;
